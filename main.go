@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Asri-Mohamad/Master_Function"
@@ -23,29 +24,33 @@ checkExit:
 	for {
 		showMenu()
 		ch := Master_Function.CharGetKey()
-
+		fmt.Println(ch - 48)
 		switch ch {
 		case '1':
-			fmt.Println("1")
+
 			addTask(&taskMaster)
 		case '2':
-			fmt.Println("2")
+
 			deleteTask(&taskMaster)
 		case '3':
-			fmt.Println("3")
+
+			taskMaster = editTask(taskMaster)
+
+		case '4':
+
 			showList(&taskMaster)
 			fmt.Println("Press any key...")
 			_ = Master_Function.CharGetKey()
-		case '4':
-			fmt.Println("4")
-			saveList(taskMaster)
 		case '5':
-			fmt.Println("5")
-			taskMaster = loadList(taskMaster)
+
+			saveList(taskMaster)
 		case '6':
-			fmt.Println("6")
+
+			taskMaster = loadList(taskMaster)
+		case '7':
+
 			if len(taskMaster) > 0 {
-				fmt.Println("The list in not empty do you want Save change?(Y/N)")
+				fmt.Printf("The list in not empty do you want Save change?(%v/%v)\n", Master_Function.ColorText("green", "Y"), Master_Function.ColorText("Read", "N"))
 				for {
 					yn := Master_Function.CharGetKey()
 					if yn == 'Y' || yn == 'y' || yn == 'n' || yn == 'N' {
@@ -72,7 +77,11 @@ checkExit:
 // ---------------------------------------------------
 func showMenu() {
 	Master_Function.Cls()
-	fmt.Print("1) Add to list .\n2)Delete from list.\n3)Show list.\n4)Save to file\n5)Load List\n6)Exit list.\nAnsser :")
+
+	fmt.Printf("%s) Add to list\n%s) Delete from list\n%s) Edit \n%s) Show list\n%s) Save to file\n%s) Load list\n%s) Exit\nAnswer: ",
+		Master_Function.ColorText("green", "1"), Master_Function.ColorText("green", "2"), Master_Function.ColorText("green", "3"),
+		Master_Function.ColorText("green", "4"), Master_Function.ColorText("green", "5"),
+		Master_Function.ColorText("green", "6"), Master_Function.ColorText("green", "7"))
 
 }
 
@@ -82,13 +91,13 @@ func addTask(tasks *[]taskStruct) {
 	newTask := bufio.NewReader(os.Stdin)
 
 	fmt.Println("Add New task.....")
-	fmt.Print("Enter new task :")
+	fmt.Printf("Enter new  %s :", Master_Function.ColorText("yellow", "Task"))
 	readTask, _ := newTask.ReadString('\n')
 	readTask = strings.TrimSpace(readTask)
-	fmt.Print("Enter date :")
+	fmt.Printf("Enter date %s :", Master_Function.ColorText("blue", "Date"))
 	readDate, _ := newTask.ReadString('\n')
 	readDate = strings.TrimSpace(readDate)
-	fmt.Print("Enter Time :")
+	fmt.Printf("Enter time %s :", Master_Function.ColorText("mango", "Time"))
 	readTime, _ := newTask.ReadString('\n')
 	readTime = strings.TrimSpace(readTime)
 
@@ -98,7 +107,7 @@ func addTask(tasks *[]taskStruct) {
 		Time: readTime}
 	*tasks = append(*tasks, read)
 	fmt.Println("New task added...")
-	//fmt.Printf("%T - %T - %T", readTask, readDate, readTime)
+
 	_ = Master_Function.CharGetKey()
 }
 
@@ -106,6 +115,7 @@ func addTask(tasks *[]taskStruct) {
 
 func deleteTask(tasks *[]taskStruct) {
 	var index int
+	var getI string
 	if len(*tasks) <= 0 {
 		fmt.Println("List is empty...")
 		_ = Master_Function.CharGetKey()
@@ -115,10 +125,13 @@ func deleteTask(tasks *[]taskStruct) {
 	fmt.Print("Enter number of task for delete :")
 out1:
 	for {
-		fmt.Scanln(&index)
-		if index >= 0 && index < len(*tasks) {
-			break out1
+		fmt.Scanln(&getI)
+		if index, err := strconv.Atoi(getI); err == nil {
 
+			if index >= 0 && index < len(*tasks) {
+				break out1
+
+			}
 		}
 		fmt.Printf("\nError to Enter! please Enter betwin 0 to %v: ", len(*tasks)-1)
 
@@ -150,7 +163,11 @@ outLoop:
 func showList(tasks *[]taskStruct) {
 	fmt.Println()
 	for key, data := range *tasks {
-		fmt.Printf("%v) Task: %s   Date: %s   Time: %s\n--------------\n", key, data.Task, data.Date, data.Time)
+		fmt.Printf("%s  %s %s   %s %s   %s %s\n%s\n", Master_Function.ColorText("read", strconv.Itoa(key)+")"),
+			Master_Function.ColorText("yellow", "Task :"), Master_Function.ColorText("green", data.Task),
+			Master_Function.ColorText("yellow", "Date:"), Master_Function.ColorText("cyan", data.Date),
+			Master_Function.ColorText("yellow", "Time:"), Master_Function.ColorText("blue", data.Time),
+			Master_Function.ColorText("magenta", "-----------------------"))
 
 	}
 
@@ -187,10 +204,10 @@ func saveList(tasks []taskStruct) {
 		if err != nil {
 			fmt.Println("Write file have problem....")
 			_ = Master_Function.CharGetKey()
-			return
+
 		}
 
-		fmt.Printf("Save is completly...%v data saved", len(tasks))
+		fmt.Printf("\nSave is completly...%v data saved", len(tasks))
 		_ = Master_Function.CharGetKey()
 	}
 
@@ -199,7 +216,7 @@ func saveList(tasks []taskStruct) {
 // ---------------------------------------------------
 func loadList(tasks []taskStruct) []taskStruct {
 	if len(tasks) > 0 {
-		fmt.Println("The list in not empty do you want over write?(Y/N)")
+		fmt.Printf("\n%s", Master_Function.ColorText("yellow", "The list in not empty do you want over write?(Y/N)"))
 		for {
 			yn := Master_Function.CharGetKey()
 			if yn == 'Y' || yn == 'y' || yn == 'n' || yn == 'N' {
@@ -213,7 +230,7 @@ func loadList(tasks []taskStruct) []taskStruct {
 	file, err := os.Open("tasks.json")
 
 	if err != nil {
-		fmt.Println("I Can't open file ....")
+		fmt.Printf("%s\n", Master_Function.ColorText("read", "I Can't open file ...."))
 		_ = Master_Function.CharGetKey()
 		return tasks
 	} else {
@@ -221,14 +238,72 @@ func loadList(tasks []taskStruct) []taskStruct {
 		decode := json.NewDecoder(file)
 		err := decode.Decode(&tasks)
 		if err != nil {
-			fmt.Println("Decoding file problem....")
+			fmt.Printf("\n%s", Master_Function.ColorText("read", "Decoding file problem...."))
 			_ = Master_Function.CharGetKey()
 			return tasks
 		}
 
 	}
-	fmt.Println("The list loded OK....")
+	fmt.Printf("%s\n", Master_Function.ColorText("yellow", "The list loded OK...."))
 	_ = Master_Function.CharGetKey()
+	return tasks
+}
+
+// ---------------------------------------------------
+func editTask(tasks []taskStruct) []taskStruct {
+	var getI string
+	var index int
+	if len(tasks) <= 0 {
+		fmt.Println("List is empty...")
+		_ = Master_Function.CharGetKey()
+		return tasks
+	}
+	showList(&tasks)
+	fmt.Print("Enter number of task for Edit :")
+out1:
+	for {
+		fmt.Scanln(&getI)
+		if index, err := strconv.Atoi(getI); err == nil {
+
+			if index >= 0 && index < len(tasks) {
+
+				break out1
+
+			}
+		}
+		fmt.Printf("\nError to Enter! please Enter betwin 0 to %v: ", len(tasks)-1)
+
+	}
+
+	fmt.Printf("\n%v) Task: %s   Date: %s   Time: %s\nAre you shore for Edit ?(Y/N)", index, tasks[index].Task,
+		tasks[index].Date, tasks[index].Time)
+
+outLoop:
+	for {
+
+		switch Master_Function.CharGetKey() {
+		case 'Y', 'y':
+			newTask := bufio.NewReader(os.Stdin)
+			fmt.Printf("\nEnter new  %s :", Master_Function.ColorText("yellow", "Task"))
+			readTask, _ := newTask.ReadString('\n')
+			readTask = strings.TrimSpace(readTask)
+			fmt.Printf("Enter date %s :", Master_Function.ColorText("blue", "Date"))
+			readDate, _ := newTask.ReadString('\n')
+			readDate = strings.TrimSpace(readDate)
+			fmt.Printf("Enter time %s :", Master_Function.ColorText("mango", "Time"))
+			readTime, _ := newTask.ReadString('\n')
+			readTime = strings.TrimSpace(readTime)
+
+			tasks[index] = taskStruct{readTask, readDate, readTime}
+			fmt.Println("\nEdit Complet...")
+			break outLoop
+
+		case 'N', 'n':
+			fmt.Println("N")
+			break outLoop
+
+		}
+	}
 	return tasks
 }
 
